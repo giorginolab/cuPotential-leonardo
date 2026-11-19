@@ -1,0 +1,64 @@
+srun: job 64882374 queued and waiting for resources
+srun: job 64882374 has been allocated resources
+Loading gcc/12.2.0
+  Loading requirement: zlib-ng/2.1.6-jkgunjc zstd/1.5.6-uq5yyux binutils/2.42
+Using CHARMM36 with CHARMM TIP3P. The upstream progress label still says Amber14.
+
+============================================================
+  DHFR  (NVT)
+============================================================
+Loading dhfr...
+  23558 atoms
+Creating system (Amber14, PME 0.9 nm, HBonds, rigid water, HMR)...
+CHARMM36 forces: [('HarmonicBondForce', 'HarmonicBondForce'), ('PeriodicTorsionForce', 'PeriodicTorsionForce'), ('CustomTorsionForce', 'CustomTorsionForce'), ('CMAPTorsionForce', 'CMAPTorsionForce'), ('NonbondedForce', 'NonbondedForce'), ('CustomNonbondedForce', 'LennardJones'), ('CMMotionRemover', 'CMMotionRemover'), ('HarmonicAngleForce', 'HarmonicAngleForce'), ('CustomBondForce', 'LennardJones14')]
+[nv-plugin cupo] convolution mesh=35,35,35 support=11,11,11 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=16.048,16.486,24.343 cufft_us=22.063,17.865,29.269 setup_ms=180.564
+Total energy: plugin -298305.5446  stock -298308.5651 kJ/mol  (differ by 1.01e-05, not a tolerance)
+Checking accuracy against high-accuracy references...
+  electrostatics: reference at alpha=2.9203/nm, 2x cutoff, grid 112x112x112, fp64
+[nv-plugin cupo] convolution mesh=35,35,35 support=11,11,11 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=16.048,16.176,24.087 cufft_us=22.086,17.609,28.985 setup_ms=52.134
+    energy  plugin 3.68e-06   stock 5.07e-06   (tol 1e-04)
+    force   plugin 4.25e-04   stock 6.79e-04   (tol 1e-03)
+  van der Waals:  reference at the same 0.9 nm cutoff, fp64
+[nv-plugin cupo] convolution mesh=35,35,35 support=11,11,11 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=16.000,16.384,24.204 cufft_us=22.039,17.664,29.127 setup_ms=50.988
+    energy  plugin 8.87e-08   stock 8.87e-08   (tol 1e-05)
+    force   plugin 1.10e-05   stock 1.10e-05   (tol 1e-04)
+Timing stock OpenMM (3000 steps, NVT)...
+  0.307 ms/step  (1125.4 ns/day)
+Timing Nvidia plugin (3000 steps, NVT)...
+[nv-plugin cupo] convolution mesh=35,35,35 support=11,11,11 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=14.306,14.441,21.504 cufft_us=19.633,15.584,25.728 setup_ms=49.549
+  0.301 ms/step  (1150.1 ns/day)
+  Speedup: 1.02x
+
+============================================================
+  DHFR  (NPT)
+============================================================
+Loading dhfr...
+  23558 atoms
+Creating system (Amber14, PME 0.9 nm, HBonds, rigid water, HMR)...
+CHARMM36 forces: [('HarmonicBondForce', 'HarmonicBondForce'), ('PeriodicTorsionForce', 'PeriodicTorsionForce'), ('CustomTorsionForce', 'CustomTorsionForce'), ('CMAPTorsionForce', 'CMAPTorsionForce'), ('NonbondedForce', 'NonbondedForce'), ('CustomNonbondedForce', 'LennardJones'), ('CMMotionRemover', 'CMMotionRemover'), ('HarmonicAngleForce', 'HarmonicAngleForce'), ('CustomBondForce', 'LennardJones14')]
+[nv-plugin cupo] convolution mesh=35,35,35 support=11,11,11 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=16.000,16.452,24.397 cufft_us=22.063,17.829,29.184 setup_ms=50.305
+Total energy: plugin -298305.5446  stock -298308.5651 kJ/mol  (differ by 1.01e-05, not a tolerance)
+Timing stock OpenMM (3000 steps, NPT)...
+  0.367 ms/step  (941.1 ns/day)
+Timing Nvidia plugin (3000 steps, NPT)...
+[nv-plugin cupo] convolution mesh=40,40,40 support=13,13,13 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=15.044,14.938,22.412 cufft_us=21.163,17.445,27.506 setup_ms=50.106
+  0.330 ms/step  (1048.2 ns/day)
+  Speedup: 1.11x
+
+============================================================
+  SUMMARY  (NVT)
+============================================================
+  dhfr      1.02x
+
+============================================================
+  SUMMARY  (NPT)
+============================================================
+  dhfr      1.11x
+
+PASS

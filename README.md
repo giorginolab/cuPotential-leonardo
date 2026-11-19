@@ -85,3 +85,24 @@ Slurm job `64874161` ran OpenMM’s own benchmarks in NVT with CUDA mixed precis
 |---|---|---:|
 | DHFR | `pme` | 1269.07 |
 | APOA1 | `apoa1pme` | 486.321 |
+
+### CHARMM36 DHFR
+
+CHARMM36 with explicit CHARMM TIP3P water also passed on one Leonardo A100 in Slurm job `64882374`. The run used the same 23,558-atom DHFR coordinates and timing protocol as the AMBER comparison above.
+
+| Ensemble | Stock ms/step | cuPotential ms/step | Stock ns/day | cuPotential ns/day | Speedup |
+|---|---:|---:|---:|---:|---:|
+| NVT | 0.307 | 0.301 | 1125.4 | 1150.1 | 1.02× |
+| NPT | 0.367 | 0.330 | 941.1 | 1048.2 | 1.11× |
+
+cuPotential replaced the PME electrostatics force. OpenMM retained CHARMM’s separate Lennard-Jones and 1–4 terms. The adapted van der Waals check kept those terms in the double-precision reference and both comparison arms. The electrostatics and van der Waals checks passed. These timings come from one run, and the measured NVT gain was about 2%.
+
+From the repository directory after setup, copy the wrapper to shared scratch alongside the extracted NVIDIA sample.
+
+```bash
+cp charmm-dhfr.py "$trial/"
+srun -p boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 --chdir="$trial" \
+  /bin/bash "$trial/run-native.sh" "$trial/charmm-dhfr.py"
+```
+
+See [the CHARMM36 run log](charmm-dhfr.log) for the full output. The upstream sample’s progress line still says `Amber14` because the label is hardcoded.

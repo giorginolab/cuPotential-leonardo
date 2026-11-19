@@ -2,6 +2,8 @@
 
 Run NVIDIA’s cuPotential 0.3.5 sample and OpenMM 8.4’s stock benchmarks on one Leonardo A100. The setup uses `uv` and Python 3.12, with no Conda or Singularity.
 
+See https://developer.nvidia.com/blog/accelerate-molecular-dynamics-simulations-with-accurate-flexible-primitives-using-nvidia-cupotential/
+
 ## Install from scratch
 
 On a Leonardo login node, start in the directory containing this README and its two shell scripts. Use shared scratch so the GPU node can read the installation.

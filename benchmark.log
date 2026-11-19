@@ -1,0 +1,155 @@
+srun: job 64873726 queued and waiting for resources
+srun: job 64873726 has been allocated resources
+Loading gcc/12.2.0
+  Loading requirement: zlib-ng/2.1.6-jkgunjc zstd/1.5.6-uq5yyux binutils/2.42
+
+============================================================
+  APOA1  (NVT)
+============================================================
+Loading apoa1...
+  92224 atoms
+Creating system (Amber14, PME 0.9 nm, HBonds, rigid water, HMR)...
+[nv-plugin cupo] convolution mesh=60,60,60 support=22,22,22 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=22.575,20.047,31.872 cufft_us=26.266,20.331,34.176 setup_ms=175.916
+Total energy: plugin -1361365.3665  stock -1361416.1068 kJ/mol  (differ by 3.73e-05, not a tolerance)
+Checking accuracy against high-accuracy references...
+  electrostatics: reference at alpha=2.9203/nm, 2x cutoff, grid 196x196x196, fp64
+[nv-plugin cupo] convolution mesh=60,60,60 support=22,22,22 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=22.691,20.007,31.808 cufft_us=26.342,20.244,34.080 setup_ms=51.452
+    energy  plugin 1.32e-06   stock 3.09e-05   (tol 1e-04)
+    force   plugin 3.57e-04   stock 5.40e-04   (tol 1e-03)
+  van der Waals:  reference at the same 0.9 nm cutoff, fp64
+[nv-plugin cupo] convolution mesh=60,60,60 support=22,22,22 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=22.575,19.870,31.616 cufft_us=26.240,20.126,33.888 setup_ms=51.445
+    energy  plugin 1.52e-07   stock 8.44e-08   (tol 1e-05)
+    force   plugin 3.06e-05   stock 4.54e-05   (tol 1e-04)
+Timing stock OpenMM (3000 steps, NVT)...
+  0.750 ms/step  (460.7 ns/day)
+Timing Nvidia plugin (3000 steps, NVT)...
+[nv-plugin cupo] convolution mesh=60,60,60 support=22,22,22 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=22.644,19.889,31.680 cufft_us=26.394,20.086,33.952 setup_ms=51.956
+  0.285 ms/step  (1213.9 ns/day)
+  Speedup: 2.63x
+
+============================================================
+  APOA1  (NPT)
+============================================================
+Loading apoa1...
+  92224 atoms
+Creating system (Amber14, PME 0.9 nm, HBonds, rigid water, HMR)...
+[nv-plugin cupo] convolution mesh=60,60,60 support=22,22,22 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=22.668,20.047,31.872 cufft_us=26.342,20.288,34.112 setup_ms=51.164
+Total energy: plugin -1361365.3665  stock -1361416.1068 kJ/mol  (differ by 3.73e-05, not a tolerance)
+Timing stock OpenMM (3000 steps, NPT)...
+  0.897 ms/step  (385.4 ns/day)
+Timing Nvidia plugin (3000 steps, NPT)...
+[nv-plugin cupo] convolution mesh=70,70,70 support=23,23,23 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=25.907,22.251,35.547 cufft_us=30.521,22.365,38.254 setup_ms=52.154
+  0.326 ms/step  (1061.2 ns/day)
+  Speedup: 2.75x
+
+============================================================
+  BACE  (NVT)
+============================================================
+Loading bace...
+  69983 atoms
+Creating system (Amber14, PME 0.9 nm, HBonds, rigid water, HMR)...
+[nv-plugin cupo] convolution mesh=48,48,48 support=17,17,17 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=18.267,17.865,27.307 cufft_us=21.739,17.701,29.099 setup_ms=50.051
+Total energy: plugin -1134809.6511  stock -1134793.2727 kJ/mol  (differ by 1.44e-05, not a tolerance)
+Checking accuracy against high-accuracy references...
+  electrostatics: reference at alpha=2.9203/nm, 2x cutoff, grid 160x160x160, fp64
+[nv-plugin cupo] convolution mesh=48,48,48 support=17,17,17 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=18.231,17.865,27.335 cufft_us=21.653,17.591,29.013 setup_ms=50.427
+    energy  plugin 3.40e-06   stock 1.57e-05   (tol 1e-04)
+    force   plugin 4.18e-04   stock 6.08e-04   (tol 1e-03)
+  van der Waals:  reference at the same 0.9 nm cutoff, fp64
+[nv-plugin cupo] convolution mesh=48,48,48 support=17,17,17 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=18.286,17.957,27.449 cufft_us=21.675,17.646,29.184 setup_ms=50.503
+    energy  plugin 5.07e-08   stock 1.26e-07   (tol 1e-05)
+    force   plugin 1.68e-05   stock 1.59e-05   (tol 1e-04)
+Timing stock OpenMM (3000 steps, NVT)...
+  0.548 ms/step  (630.3 ns/day)
+Timing Nvidia plugin (3000 steps, NVT)...
+[nv-plugin cupo] convolution mesh=48,48,48 support=17,17,17 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=16.282,15.840,24.343 cufft_us=19.377,15.632,25.907 setup_ms=49.461
+  0.181 ms/step  (1911.7 ns/day)
+  Speedup: 3.03x
+
+============================================================
+  BACE  (NPT)
+============================================================
+Loading bace...
+  69983 atoms
+Creating system (Amber14, PME 0.9 nm, HBonds, rigid water, HMR)...
+[nv-plugin cupo] convolution mesh=48,48,48 support=17,17,17 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=18.231,17.920,27.315 cufft_us=21.717,17.829,29.184 setup_ms=50.648
+Total energy: plugin -1134809.6511  stock -1134793.2727 kJ/mol  (differ by 1.44e-05, not a tolerance)
+Timing stock OpenMM (3000 steps, NPT)...
+  0.699 ms/step  (494.3 ns/day)
+Timing Nvidia plugin (3000 steps, NPT)...
+[nv-plugin cupo] convolution mesh=55,55,55 support=20,20,20 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=18.560,17.118,26.394 cufft_us=24.269,18.231,30.692 setup_ms=50.799
+  0.223 ms/step  (1546.6 ns/day)
+  Speedup: 3.13x
+
+============================================================
+  DHFR  (NVT)
+============================================================
+Loading dhfr...
+  23558 atoms
+Creating system (Amber14, PME 0.9 nm, HBonds, rigid water, HMR)...
+[nv-plugin cupo] convolution mesh=35,35,35 support=11,11,11 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=16.080,16.606,24.297 cufft_us=22.225,17.829,29.326 setup_ms=50.399
+Total energy: plugin -298136.5978  stock -298139.4829 kJ/mol  (differ by 9.68e-06, not a tolerance)
+Checking accuracy against high-accuracy references...
+  electrostatics: reference at alpha=2.9203/nm, 2x cutoff, grid 112x112x112, fp64
+[nv-plugin cupo] convolution mesh=35,35,35 support=11,11,11 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=16.016,16.247,24.017 cufft_us=22.156,17.609,29.042 setup_ms=49.872
+    energy  plugin 3.50e-06   stock 4.82e-06   (tol 1e-04)
+    force   plugin 4.27e-04   stock 6.82e-04   (tol 1e-03)
+  van der Waals:  reference at the same 0.9 nm cutoff, fp64
+[nv-plugin cupo] convolution mesh=35,35,35 support=11,11,11 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=15.984,16.230,24.064 cufft_us=22.132,17.536,28.956 setup_ms=50.352
+    energy  plugin 9.38e-07   stock 3.06e-07   (tol 1e-05)
+    force   plugin 1.15e-05   stock 1.11e-05   (tol 1e-04)
+Timing stock OpenMM (3000 steps, NVT)...
+  0.284 ms/step  (1216.9 ns/day)
+Timing Nvidia plugin (3000 steps, NVT)...
+[nv-plugin cupo] convolution mesh=35,35,35 support=11,11,11 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=14.321,14.472,21.419 cufft_us=19.732,15.664,25.907 setup_ms=49.716
+  0.088 ms/step  (3941.3 ns/day)
+  Speedup: 3.24x
+
+============================================================
+  DHFR  (NPT)
+============================================================
+Loading dhfr...
+  23558 atoms
+Creating system (Amber14, PME 0.9 nm, HBonds, rigid water, HMR)...
+[nv-plugin cupo] convolution mesh=35,35,35 support=11,11,11 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=15.984,16.572,24.227 cufft_us=22.156,17.829,29.326 setup_ms=50.359
+Total energy: plugin -298136.5978  stock -298139.4829 kJ/mol  (differ by 9.68e-06, not a tolerance)
+Timing stock OpenMM (3000 steps, NPT)...
+  0.341 ms/step  (1013.2 ns/day)
+Timing Nvidia plugin (3000 steps, NPT)...
+[nv-plugin cupo] convolution mesh=40,40,40 support=13,13,13 compact=1 mode=auto
+[nv-plugin cupo] convolution selection potential=compact energy=compact both=compact compact_us=15.044,15.164,22.505 cufft_us=21.035,17.591,27.534 setup_ms=49.533
+  0.099 ms/step  (3492.0 ns/day)
+  Speedup: 3.45x
+
+============================================================
+  SUMMARY  (NVT)
+============================================================
+  apoa1     2.63x
+  bace      3.03x
+  dhfr      3.24x
+
+============================================================
+  SUMMARY  (NPT)
+============================================================
+  apoa1     2.75x
+  bace      3.13x
+  dhfr      3.45x
+
+PASS

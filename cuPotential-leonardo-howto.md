@@ -4,10 +4,9 @@ NVIDIA’s full solvated-systems benchmark passed on one A100 in Slurm job `6487
 
 ## Rerun the benchmark
 
-The prepared environment and inputs are on shared scratch, which the compute nodes can access. This directory contains reference copies of the scripts and the verified log. The runnable copies stay alongside their dependencies on shared scratch. Run from a Leonardo login node.
+For a fresh installation, follow [Install from scratch](README.md#install-from-scratch) on a Leonardo login node. Keep the `trial` variable from setup. To reuse the original installation, set `trial="$SCRATCH/cupotential-BMLcMk"` if you have access to it.
 
 ```bash
-trial="$SCRATCH/cupotential-BMLcMk"
 set -o pipefail
 srun --partition=boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 \
   --chdir="$trial" /bin/bash "$trial/run-native.sh" \
@@ -18,10 +17,9 @@ The explicit partition selects A100 nodes. The runner unpacks its dependencies i
 
 ## Run OpenMM’s own benchmarks
 
-From a Leonardo login node, run DHFR and APOA1 with stock OpenMM on one A100. The prepared `inputs` directory contains OpenMM 8.4’s benchmark script and both PDB files.
+From a Leonardo login node, run DHFR and APOA1 with stock OpenMM on one A100. Use the same `trial` directory. Its `inputs` directory contains OpenMM 8.4’s benchmark script and both PDB files.
 
 ```bash
-trial="$SCRATCH/cupotential-BMLcMk"
 srun --partition=boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 \
   --chdir="$trial" /bin/bash "$trial/run-native.sh" "$trial/inputs/benchmark.py" \
   --platform=CUDA --precision=mixed --test=pme,apoa1pme --ensemble=NVT \
@@ -42,12 +40,26 @@ See [NVIDIA’s installation requirements](https://docs.nvidia.com/cuda/cupotent
 
 ## Verified results
 
-All three systems passed the sample’s accuracy checks against double-precision references.
+### NVIDIA cuPotential comparison
 
-| System | NVT speedup | NPT speedup |
-|---|---:|---:|
-| APOA1 | 2.63× | 2.75× |
-| BACE | 3.03× | 3.13× |
-| DHFR | 3.24× | 3.45× |
+Slurm job `64873726` ran 500 warm-up steps and 3,000 timed steps per implementation and ensemble. All three systems passed the sample’s energy and force checks against double-precision references.
+
+| System | Ensemble | Stock ms/step | cuPotential ms/step | Stock ns/day | cuPotential ns/day | Speedup |
+|---|---|---:|---:|---:|---:|---:|
+| APOA1 | NVT | 0.750 | 0.285 | 460.7 | 1213.9 | 2.63× |
+| APOA1 | NPT | 0.897 | 0.326 | 385.4 | 1061.2 | 2.75× |
+| BACE | NVT | 0.548 | 0.181 | 630.3 | 1911.7 | 3.03× |
+| BACE | NPT | 0.699 | 0.223 | 494.3 | 1546.6 | 3.13× |
+| DHFR | NVT | 0.284 | 0.088 | 1216.9 | 3941.3 | 3.24× |
+| DHFR | NPT | 0.341 | 0.099 | 1013.2 | 3492.0 | 3.45× |
 
 See [benchmark.log](benchmark.log) for the full output.
+
+### Stock OpenMM benchmark
+
+Slurm job `64874161` ran OpenMM’s own benchmarks in NVT with CUDA mixed precision and a 10-second target per test. These are standalone throughput measurements using OpenMM’s benchmark settings.
+
+| System | OpenMM test | Throughput (ns/day) |
+|---|---|---:|
+| DHFR | `pme` | 1269.07 |
+| APOA1 | `apoa1pme` | 486.321 |

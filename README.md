@@ -6,49 +6,36 @@ See https://developer.nvidia.com/blog/accelerate-molecular-dynamics-simulations-
 
 ## Install from scratch
 
-On a Leonardo login node, start in the directory containing this README and its two shell scripts. Use shared scratch so the GPU node can read the installation.
+On a Leonardo login node, start in the directory containing this README and its shell scripts. Use shared scratch so the GPU node can read the installation. The setup takes about 30 seconds.
 
 ```bash
 set -e
 trial=$(mktemp -d "$SCRATCH/cupotential-XXXXXX")
 printf 'Installation directory: %s\n' "$trial"
 cp setup-native.sh run-native.sh "$trial/"
-cp "$(command -v uv)" "$trial/uv"
-"$trial/uv" python install 3.12
-cd "$trial"
-
-wget -O source.tar.gz https://codeload.github.com/NVIDIA/cuPotential/tar.gz/refs/tags/v0.3.5
-tar -xzf source.tar.gz
-
-wget -O libc6.deb \
-  https://archive.ubuntu.com/ubuntu/pool/main/g/glibc/libc6_2.39-0ubuntu8_amd64.deb
-wget -O cuda-compat-13-4.deb \
-  https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-compat-13-4_615.71.10-1ubuntu1_amd64.deb
-
-mkdir -p inputs
-openmm_url=https://raw.githubusercontent.com/openmm/openmm/8.4.0/examples/benchmarks
-for file in benchmark.py apoa1.pdb 5dfr_solv-cube_equil.pdb; do
-  wget -O "inputs/$file" "$openmm_url/$file"
-done
-
-bash setup-native.sh
+bash "$trial/setup-native.sh"
 ```
 
-The setup script downloads the Python wheels with `uv` and stages them in `packages.tar`. The runner loads Leonardo’s CUDA and GCC modules and uses the downloaded glibc and CUDA compatibility libraries for the benchmark process.
+`setup-native.sh` does all the downloading: the pinned cuPotential 0.3.5 source (for the sample), the OpenMM 8.4.0 benchmark inputs, and the Python wheels (via `uv`, staged in `packages.tar`). It also fetches the two runtime libraries below. Both downloads and the OpenMM inputs are SHA-256-checked and unpacked once into `$trial/runtime`.
+
+- **glibc 2.39** (Ubuntu `libc6`). The cuPotential wheel needs glibc 2.38 or newer, and Leonardo has 2.28 with no newer site module. The runner starts Python through this private loader, so the host is untouched. The wheel's native library cannot load on glibc 2.28, so this download has no wheel-only substitute.
+- **`cuda-compat-13-4`**. Leonardo's R535 driver is older than the R615 that CUDA 13.4 needs. NVIDIA's [forward-compatibility package](https://docs.nvidia.com/cuda/cupotential/install) covers the gap.
+
+The runner loads Leonardo's CUDA and GCC modules and unpacks the wheels to node-local storage for each job.
 
 ## Run
 
 Keep `trial` set to the installation directory printed above. Run NVIDIA’s full benchmark, which compares cuPotential with stock OpenMM and ends with `PASS` on success.
 
 ```bash
-srun -p boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 --chdir="$trial" \
+srun -A $SLURM_ACCOUNT -p boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 --chdir="$trial" \
   /bin/bash "$trial/run-native.sh"
 ```
 
 Run OpenMM’s own DHFR and APOA1 benchmarks in mixed precision. Use `--ensemble=NPT` for constant pressure.
 
 ```bash
-srun -p boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 --chdir="$trial" \
+srun -A $SLURM_ACCOUNT -p boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 --chdir="$trial" \
   /bin/bash "$trial/run-native.sh" "$trial/inputs/benchmark.py" \
   --platform=CUDA --precision=mixed --test=pme,apoa1pme --ensemble=NVT \
   --seconds=10 --style=table
@@ -101,7 +88,7 @@ From the repository directory after setup, copy the wrapper to shared scratch al
 
 ```bash
 cp charmm-dhfr.py "$trial/"
-srun -p boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 --chdir="$trial" \
+srun -A $SLURM_ACCOUNT -p boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 --chdir="$trial" \
   /bin/bash "$trial/run-native.sh" "$trial/charmm-dhfr.py"
 ```
 

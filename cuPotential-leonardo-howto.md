@@ -8,7 +8,7 @@ For a fresh installation, follow [Install from scratch](README.md#install-from-s
 
 ```bash
 set -o pipefail
-srun --partition=boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 \
+srun -A $SLURM_ACCOUNT --partition=boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 \
   --chdir="$trial" /bin/bash "$trial/run-native.sh" \
   2>&1 | tee "$trial/benchmark-rerun.log"
 ```
@@ -20,7 +20,7 @@ The explicit partition selects A100 nodes. The runner unpacks its dependencies i
 From a Leonardo login node, run DHFR and APOA1 with stock OpenMM on one A100. Use the same `trial` directory. Its `inputs` directory contains OpenMM 8.4’s benchmark script and both PDB files.
 
 ```bash
-srun --partition=boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 \
+srun -A $SLURM_ACCOUNT --partition=boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 \
   --chdir="$trial" /bin/bash "$trial/run-native.sh" "$trial/inputs/benchmark.py" \
   --platform=CUDA --precision=mixed --test=pme,apoa1pme --ensemble=NVT \
   --seconds=10 --style=table
@@ -31,8 +31,8 @@ Use `--ensemble=NPT` for constant pressure, or `--test=pme` for DHFR alone. The 
 ## Native setup
 
 - The runner loads `module add cuda/12.6` and `module add gcc/12.2.0`. CUDA 12.6 is the newest site module available on the tested node. The release wheel’s dependencies supply the CUDA 13.4 runtime libraries.
-- `setup-native.sh` stages the wheels with `uv`, targeting `x86_64-manylinux_2_38`, and writes `packages.tar` to shared scratch. Run it from the login node if the package archive needs rebuilding. It uses login-node `/scratch_local` for staging by default.
-- Leonardo’s host glibc was 2.28. The runner starts Python through a private glibc 2.39 loader unpacked from `libc6.deb`.
+- `setup-native.sh` stages the wheels with `uv`, targeting `x86_64-manylinux_2_38`, and writes `packages.tar` to shared scratch. Run it from the login node if the package archive needs rebuilding. It stages in `$TMPDIR` (or `/tmp`) by default; set `CUPOTENTIAL_STAGING_DIR` to override.
+- Leonardo’s host glibc was 2.28. `libOpenMMNvidiaCUDA.so` in the wheel needs `GLIBC_2.38` (`__isoc23_strtol`, `__isoc23_sscanf`) and `GLIBC_2.34` (`dlopen`), so the runner starts Python through a private glibc 2.39 loader that `setup-native.sh` extracted to `runtime/glibc`.
 - The tested A100 node ran driver 535.274.02. The runner puts the libraries unpacked from NVIDIA’s `cuda-compat-13-4` package on the private loader’s library path ahead of the system driver libraries.
 - The job runs without Conda or Singularity. The pinned cuPotential source archive supplies the sample and BACE input. The APOA1 and DHFR inputs were fetched from OpenMM 8.4.0 and verified against the checksums expected by the sample.
 

@@ -1,4 +1,6 @@
 #!/bin/bash -l
+# Run a cuPotential/OpenMM script on a GPU node (call through srun, see README).
+#   run-native.sh [script.py [args...]]    default: NVIDIA's solvated_systems sample
 set -eo pipefail
 cd "$(dirname "$0")"
 trial=$PWD
@@ -6,12 +8,9 @@ module add cuda/12.6
 module add gcc/12.2.0
 local_trial=$(mktemp -d "${TMPDIR:-/dev/shm}/cupotential-XXXXXX")
 trap 'rm -rf -- "$local_trial"' EXIT
-mkdir "$local_trial/glibc" "$local_trial/compat"
-ar p "$trial/libc6.deb" data.tar.zst | zstd -dc | tar -xf - -C "$local_trial/glibc"
-ar p "$trial/cuda-compat-13-4.deb" data.tar.xz | tar -xJf - -C "$local_trial/compat"
 tar -xf "$trial/packages.tar" -C "$local_trial"
-glibc="$local_trial/glibc/usr/lib/x86_64-linux-gnu"
-compat="$local_trial/compat/usr/local/cuda-13.4/compat"
+glibc="$trial/runtime/glibc/usr/lib/x86_64-linux-gnu"
+compat="$trial/runtime/compat/usr/local/cuda-13.4/compat"
 libstdcpp=$(dirname "$(g++ -print-file-name=libstdc++.so.6)")
 python=$("$trial/uv" python find 3.12)
 export PYTHONPATH="$local_trial/packages"

@@ -1,0 +1,54 @@
+srun: job 64945303 queued and waiting for resources
+srun: job 64945303 has been allocated resources
+Loading gcc/12.2.0
+  Loading requirement: zlib-ng/2.1.6-jkgunjc zstd/1.5.6-uq5yyux binutils/2.42
+Using charmm36_2024 with CHARMM TIP3P (LJ folded into NonbondedForce). The upstream progress label still says Amber14.
+
+============================================================
+  DHFR  (NVT)
+============================================================
+Loading dhfr...
+  23558 atoms
+Creating system (Amber14, PME 0.9 nm, HBonds, rigid water, HMR)...
+NBFIX: 9 atom types, 81 atoms in the correction force
+CHARMM36 forces: [('HarmonicBondForce', 'HarmonicBondForce'), ('PeriodicTorsionForce', 'PeriodicTorsionForce'), ('CMAPTorsionForce', 'CMAPTorsionForce'), ('NonbondedForce', 'NonbondedForce'), ('CMMotionRemover', 'CMMotionRemover'), ('HarmonicAngleForce', 'HarmonicAngleForce'), ('CustomBondForce', 'LennardJones14'), ('CustomTorsionForce', 'CustomTorsionForce'), ('CustomNonbondedForce', 'NBFIXCorrection')]
+Total energy: plugin -298281.6521  stock -298284.6151 kJ/mol  (differ by 9.93e-06, not a tolerance)
+Checking accuracy against high-accuracy references...
+  electrostatics: reference at alpha=2.9203/nm, 2x cutoff, grid 112x112x112, fp64
+    energy  plugin 3.68e-06   stock 5.07e-06   (tol 1e-04)
+    force   plugin 4.25e-04   stock 6.79e-04   (tol 1e-03)
+  van der Waals:  reference at the same 0.9 nm cutoff, fp64
+    energy  plugin 2.23e-06   stock 3.91e-07   (tol 1e-05)
+    force   plugin 1.15e-05   stock 1.10e-05   (tol 1e-04)
+Timing stock OpenMM (3000 steps, NVT)...
+  0.295 ms/step  (1173.3 ns/day)
+Timing Nvidia plugin (3000 steps, NVT)...
+  0.112 ms/step  (3087.9 ns/day)
+  Speedup: 2.63x
+
+============================================================
+  DHFR  (NPT)
+============================================================
+Loading dhfr...
+  23558 atoms
+Creating system (Amber14, PME 0.9 nm, HBonds, rigid water, HMR)...
+NBFIX: 9 atom types, 81 atoms in the correction force
+CHARMM36 forces: [('HarmonicBondForce', 'HarmonicBondForce'), ('PeriodicTorsionForce', 'PeriodicTorsionForce'), ('CMAPTorsionForce', 'CMAPTorsionForce'), ('NonbondedForce', 'NonbondedForce'), ('CMMotionRemover', 'CMMotionRemover'), ('HarmonicAngleForce', 'HarmonicAngleForce'), ('CustomBondForce', 'LennardJones14'), ('CustomTorsionForce', 'CustomTorsionForce'), ('CustomNonbondedForce', 'NBFIXCorrection')]
+Total energy: plugin -298281.6521  stock -298284.6151 kJ/mol  (differ by 9.93e-06, not a tolerance)
+Timing stock OpenMM (3000 steps, NPT)...
+  0.352 ms/step  (982.8 ns/day)
+Timing Nvidia plugin (3000 steps, NPT)...
+  0.126 ms/step  (2750.0 ns/day)
+  Speedup: 2.80x
+
+============================================================
+  SUMMARY  (NVT)
+============================================================
+  dhfr      2.63x
+
+============================================================
+  SUMMARY  (NPT)
+============================================================
+  dhfr      2.80x
+
+PASS

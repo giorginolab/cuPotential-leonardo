@@ -53,36 +53,18 @@ All three systems used AMBER14. The stock arm used PME with an Ewald error toler
 
 Slurm job `64873726` ran 500 warm-up steps and 3,000 timed steps per implementation and ensemble. All three systems passed the sample’s energy and force checks against double-precision references.
 
-| System | Ensemble | Stock ms/step | cuPotential ms/step | Stock ns/day | cuPotential ns/day | Speedup |
+| System | Force field | Ensemble | Stock ms/step | cuPotential ms/step | Stock ns/day | cuPotential ns/day | Speedup |
 |---|---|---:|---:|---:|---:|---:|
-| APOA1 | NVT | 0.750 | 0.285 | 460.7 | 1213.9 | 2.63× |
-| APOA1 | NPT | 0.897 | 0.326 | 385.4 | 1061.2 | 2.75× |
-| BACE | NVT | 0.548 | 0.181 | 630.3 | 1911.7 | 3.03× |
-| BACE | NPT | 0.699 | 0.223 | 494.3 | 1546.6 | 3.13× |
-| DHFR | NVT | 0.284 | 0.088 | 1216.9 | 3941.3 | 3.24× |
-| DHFR | NPT | 0.341 | 0.099 | 1013.2 | 3492.0 | 3.45× |
+| CHARMM36 | NVT | 0.286 | 0.097 | 1207.0 | 3568.0 | 2.96× |
+| CHARMM36 | NPT | 0.345 | 0.111 | 1001.4 | 3109.4 | 3.11× |
+| CHARMM36m | NVT | 0.295 | 0.112 | 1173.3 | 3087.9 | 2.63× |
+| CHARMM36m | NPT | 0.352 | 0.126 | 982.8 | 2750.0 | 2.80× |
 
-See [benchmark.log](benchmark.log) for the full output.
+CHARMM36m is OpenMM 8.4’s `charmm36_2024.xml` (protein parameters from `par_all36m_prot.prm`). Both arms use the same folded system, and all accuracy checks passed for both force fields.
 
-### Stock OpenMM benchmark
+**Why a naive CHARMM36 run shows no speedup.** OpenMM’s CHARMM36 force field puts Lennard-Jones in a separate `CustomNonbondedForce` with tabulated per-type-pair coefficients. cuPotential only replaces the `NonbondedForce` (the plugin rejects tabulated functions), so a stock `createSystem` run leaves LJ on OpenMM’s kernel. Stock OpenMM overlaps PME and that LJ kernel on separate streams. With the plugin, PME gets 2.2× faster (0.184 to 0.084 ms per force evaluation) but the unaccelerated LJ force (about 0.15 ms) becomes the critical path. Stock ran 0.307 ms/step and the plugin 0.301 (NVT), a 1.02× speedup, and 1.11× under NPT.
 
-Slurm job `64874161` ran OpenMM’s own benchmarks in NVT with CUDA mixed precision and a 10-second target per test. Both tests used PME. DHFR used AMBER99SB, and APOA1 used AMBER ff14SB with Lipid17.
-
-| System | OpenMM test | Throughput (ns/day) |
-|---|---|---:|
-| DHFR | `pme` | 1269.07 |
-| APOA1 | `apoa1pme` | 486.321 |
-
-### CHARMM36 DHFR
-
-CHARMM36 with explicit CHARMM TIP3P water also passed on one Leonardo A100 in Slurm job `64882374`. The run used the same 23,558-atom DHFR coordinates and timing protocol as the AMBER comparison above.
-
-| Ensemble | Stock ms/step | cuPotential ms/step | Stock ns/day | cuPotential ns/day | Speedup |
-|---|---:|---:|---:|---:|---:|
-| NVT | 0.307 | 0.301 | 1125.4 | 1150.1 | 1.02× |
-| NPT | 0.367 | 0.330 | 941.1 | 1048.2 | 1.11× |
-
-cuPotential replaced the PME electrostatics force. OpenMM retained CHARMM’s separate Lennard-Jones and 1–4 terms. The adapted van der Waals check kept those terms in the double-precision reference and both comparison arms. The electrostatics and van der Waals checks passed. These timings come from one run, and the measured NVT gain was about 2%.
+**The fix.** [charmm-dhfr.py](charmm-dhfr.py) moves LJ into the `NonbondedForce` as per-atom sigma and epsilon, which the plugin accelerates natively. This is exact when CHARMM has no NBFIX pair overrides, as for this system’s 27 atom types. The script checks every type pair against Lorentz-Berthelot mixing and refuses to run if any pair deviates. The 1–4 LJ stays in OpenMM’s small `LennardJones14` bond force (about 0.02 ms). The folded system reproduces the original stock energy to 0.01 kJ/mol, and the sample’s electrostatics and van der Waals accuracy checks pass. The stock arm also runs faster after the fold (0.286 versus 0.307 ms/step), so the table’s speedup is against the faster baseline. Against the original unfolded stock system, the NVT speedup is 3.2×. CHARMM36 disables the dispersion correction by default, and the script keeps whatever the original LJ force specified. CHARMM36m does have NBFIX overrides: 9 atom types (81 atoms of this DHFR system) deviate from Lorentz-Berthelot mixing. The script puts the Lorentz-Berthelot LJ in the `NonbondedForce` and the deviation, only for those type pairs, in a small interaction-group `CustomNonbondedForce` that OpenMM evaluates. The total LJ is unchanged: the folded CHARMM36m system matches the original unfolded energy to 0.003 kJ/mol, with a maximum force difference of 0.0035 kJ/mol/nm. The extra force costs about 0.015 ms/step, which is why CHARMM36m is somewhat slower than CHARMM36 (the NPT figure also includes the plugin barostat). The sample’s accuracy checks isolate the `NonbondedForce`, so the NBFIX correction is not part of those checks. The script refuses a system that has NBFIX and a dispersion correction. It passes `useDispersionCorrection=False` for both force fields because `charmm36.xml` disables it and `charmm36_2024.xml` leaves it to OpenMM’s default of on.
 
 From the repository directory after setup, copy the wrapper to shared scratch alongside the extracted NVIDIA sample.
 
@@ -92,4 +74,6 @@ srun -A $SLURM_ACCOUNT -p boost_usr_prod --qos=boost_qos_dbg --gres=gpu:1 --chdi
   /bin/bash "$trial/run-native.sh" "$trial/charmm-dhfr.py"
 ```
 
-See [the CHARMM36 run log](charmm-dhfr.log) for the full output. The upstream sample’s progress line still says `Amber14` because the label is hardcoded.
+For CHARMM36m, add `CHARMM_FF=charmm36_2024` to the environment of that command.
+
+See the [CHARMM36](charmm-dhfr.log) and [CHARMM36m](charmm36m-dhfr.log) run logs for the full output. The upstream sample’s progress line still says `Amber14` because the label is hardcoded.

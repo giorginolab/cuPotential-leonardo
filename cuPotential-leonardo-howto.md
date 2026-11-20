@@ -38,6 +38,14 @@ Use `--ensemble=NPT` for constant pressure, or `--test=pme` for DHFR alone. The 
 
 See [NVIDIA’s installation requirements](https://docs.nvidia.com/cuda/cupotential/install) and [the cuPotential 0.3.5 release](https://github.com/NVIDIA/cuPotential/releases/tag/v0.3.5).
 
+## Troubleshooting: no speedup on a new force field
+
+cuPotential replaces only OpenMM's `NonbondedForce`. List the System's forces first (`[(type(f).__name__, f.getName()) for f in system.getForces()]`). If Lennard-Jones sits in a separate `CustomNonbondedForce`, as in OpenMM's CHARMM36 files, it stays on stock OpenMM and sets the step time. Stock OpenMM hides that cost by overlapping PME and the custom force on separate streams, so a faster PME alone gives about 1.0×. The plugin rejects `CustomNonbondedForce` with tabulated functions ("tabulated functions are not supported").
+
+To diagnose, put each force in its own force group and time them with coordinates frozen, using a `CustomIntegrator` with `setIntegrationForceGroups`. For CHARMM36 DHFR, PME fell from 0.184 to 0.084 ms with the plugin while the LJ force stayed at about 0.15 ms.
+
+The fix is to express the LJ as per-atom sigma and epsilon on the `NonbondedForce`. `charmm-dhfr.py` does this and moves any NBFIX deviation from Lorentz-Berthelot mixing into a small interaction-group `CustomNonbondedForce`. See the [README](README.md#charmm36-and-charmm36m-dhfr) for results. When you check such a change, also compare energy and forces with the original system. Mind the dispersion correction: `charmm36.xml` disables it and `charmm36_2024.xml` does not.
+
 ## Benchmark results
 
 See the [verified results in the README](README.md#verified-results) for timings, throughput, and speedups.
